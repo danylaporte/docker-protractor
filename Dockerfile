@@ -35,7 +35,9 @@ RUN ln -s /usr/bin/nodejs /usr/bin/node
 RUN npm install -g npm
 
 # Install Protractor
-RUN npm install -g protractor@4.0.4 
+RUN npm install -g protractor@4.0.4
+RUN npm list -g jasmine-reporters
+RUN npm install -g protractor-jasmine2-screenshot-reporter
 
 # Install Selenium and Chrome driver
 RUN webdriver-manager update
