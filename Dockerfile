@@ -25,7 +25,8 @@ RUN apt-get update && \
     supervisor \
     netcat-traditional \
     curl \
-    ffmpeg && \
+    ffmpeg \
+    dos2unix && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/*
 
@@ -42,9 +43,15 @@ RUN npm install -g protractor-jasmine2-screenshot-reporter
 # Install Selenium and Chrome driver
 RUN webdriver-manager update
 
+WORKDIR /project/e2e
+ADD project/package.json /project/
+RUN npm install
+
 # Add a non-privileged user for running Protrator
 RUN adduser --home /project --uid 1100 \
   --disabled-login --disabled-password --gecos node node
+
+RUN chown -R node /project
 
 # Add main configuration file
 ADD supervisor.conf /etc/supervisor/supervisor.conf
@@ -56,9 +63,10 @@ ADD supervisord/*.conf /etc/supervisor/conf.d/
 # will quit. When MANUAL envorinment variable is set when starting the container,
 # tests will NOT be executed and Xvfb and Selenium will keep running.
 ADD bin/run-protractor /usr/local/bin/run-protractor
+RUN dos2unix /usr/local/bin/run-protractor
 
 # Container's entry point, executing supervisord in the foreground
 CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/supervisor.conf"]
 
-# Protractor test project needs to be mounted at /project
-VOLUME ["/project"]
+# Protractor test project needs to be mounted at /project/e2e
+VOLUME ["/project/e2e"]
