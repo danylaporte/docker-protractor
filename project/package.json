@@ -1,12 +1,11 @@
 {
   "dependencies": {
-    "cheerio": "^0.22.0",
     "co": "^4.6.0",
     "colors": "^1.1.2",
     "crypto": "^0.0.3",
     "debug": "^2.6.0",
     "fs-promise": "^1.0.0",
     "jimp": "^0.2.27",
-    "pngjs": "^3.0.0"
+    "node-rust-resemble": "git+https://github.com/danylaporte/node-rust-resemble"
   }
 }

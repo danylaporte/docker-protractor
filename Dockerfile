@@ -1,44 +1,41 @@
-FROM debian:testing
+FROM debian:jessie
 
-ENV DEBIAN_FRONTEND noninteractive
+#ENV DEBIAN_FRONTEND noninteractive
 
-RUN apt-get update && \
-  apt-get install -y curl && \
-  apt-get clean && \
-  rm -rf /var/lib/apt/lists/*
-
-# ffmpeg is hosted at deb-multimedia.org
-RUN curl http://www.deb-multimedia.org/pool/main/d/deb-multimedia-keyring/deb-multimedia-keyring_2016.8.1_all.deb \
-  -o /tmp/deb-multimedia-keyring.deb && \  
-  dpkg -i /tmp/deb-multimedia-keyring.deb && \
-  rm /tmp/deb-multimedia-keyring.deb && \
-  echo "deb http://www.deb-multimedia.org stretch main non-free" >> /etc/apt/sources.list
-  
+# pre-setup nodejs
 RUN apt-get update && \
   apt-get install -y \
-    openjdk-8-jre \
+    curl \
+    gnupg \
+    apt-transport-https \
+    ca-certificates && \
+  apt-get clean && \
+  curl --fail -ssL -o setup-nodejs https://deb.nodesource.com/setup_7.x && \
+  bash setup-nodejs
+
+# install jre-8
+RUN echo "deb http://ftp.debian.org/debian jessie-backports main" >> /etc/apt/sources.list.d/bp.list && \
+  apt-get update && \
+  apt-get -t jessie-backports install -y openjdk-8-jre
+
+# install other dependencies
+RUN apt-get install -y \
+    build-essential \
+    nodejs \
     xvfb \
     libgconf-2-4 \
     libexif12 \
     chromium \
-    npm \
     supervisor \
     netcat-traditional \
-    curl \
-    ffmpeg \
+    git \
     dos2unix && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/*
 
-RUN ln -s /usr/bin/nodejs /usr/bin/node
-
-# Upgrade NPM to latest (address issue #3)
-RUN npm install -g npm
-
 # Install Protractor
-RUN npm install -g protractor@4.0.4
-RUN npm install -g jasmine-reporters
-RUN npm install -g protractor-jasmine2-screenshot-reporter
+RUN npm install -g protractor jasmine-reporters protractor-jasmine2-screenshot-reporter
+RUN curl -sSf https://static.rust-lang.org/rustup.sh -o "rustup.sh" && chmod u+x ./rustup.sh && ./rustup.sh --disable-sudo
 
 # Install Selenium and Chrome driver
 RUN webdriver-manager update
@@ -46,6 +43,8 @@ RUN webdriver-manager update
 WORKDIR /project/e2e
 ADD project/package.json /project/
 RUN npm install
+
+RUN cd /project/node_modules/node-rust-resemble && cargo build --release && cd /project/e2e
 
 # Add a non-privileged user for running Protrator
 RUN adduser --home /project --uid 1100 \
