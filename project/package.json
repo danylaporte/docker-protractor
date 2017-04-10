@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "crypto": "^0.0.3",
+    "draftlog": "^1.0.12",
     "fs-promise": "^1.0.0",
     "jimp": "^0.2.27",
     "node-rust-resemble": "git+https://github.com/danylaporte/node-rust-resemble"
