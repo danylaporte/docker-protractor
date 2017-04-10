@@ -1,1 +1,1 @@
-docker build . -t docker-protractor
+docker build . --no-cache -t docker-protractor
